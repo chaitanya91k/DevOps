@@ -25,6 +25,9 @@
 ` git checkout bugFix` <br/>
 ` git rebase master` <br/>
 
+#### Progress Screenshot ####
+![git_basics](https://cloud.githubusercontent.com/assets/9260911/9706541/6f3b358e-54b5-11e5-8b10-16e22303bfa7.png)
+
 ## Git Bonus ##
 
 #### Level 1: Detach HEAD ####
