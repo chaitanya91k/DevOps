@@ -48,3 +48,12 @@
 
 #### Progress Screenshot ####
 ![git_bonus](https://cloud.githubusercontent.com/assets/9260911/9706544/b54e1924-54b5-11e5-90df-b8e038e33610.png)
+
+## Hooks ##
+
+#### post-commit file ####
+` #Open webbrowser after every commit` <br />
+
+` xdg-open "https://wolfware.ncsu.edu/"``
+
+
