@@ -1,4 +1,4 @@
-# HW0 Solutions #
+# HW0 Solutions: Git Commands and Hooks #
 
 ## Git Basics ##
 
