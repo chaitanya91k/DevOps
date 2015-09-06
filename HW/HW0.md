@@ -45,3 +45,6 @@
 ` git reset HEAD~1` <br/>
 ` git checkout pushed` <br/>
 ` git revert HEAD`
+
+#### Progress Screenshot ####
+![git_bonus](https://cloud.githubusercontent.com/assets/9260911/9706544/b54e1924-54b5-11e5-90df-b8e038e33610.png)
