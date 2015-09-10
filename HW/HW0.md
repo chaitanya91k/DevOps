@@ -54,7 +54,7 @@
 #### post-commit file ####
 ` #Open webbrowser after every commit` <br />
 
-` xdg-open "https://wolfware.ncsu.edu/"``
+` xdg-open "https://wolfware.ncsu.edu/"`
 
 #### Screencast ####
 
