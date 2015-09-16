@@ -13,10 +13,10 @@
 * Update the variable ssh_path in digitalocean.js and aws.js to point to your private key
 
 ### Steps ###
-#### Script ####
+#### Method 1: Script ####
 * Run the script servers.sh using <br/> `sh servers.sh`<br/> It will install dependencies, create droplet, create instance and deploy nginx webserver through ansible playbook
 
-#### Manually ####
+#### Method 2: Manually ####
 * Install dependencies specified in package.json for needle and aws-sdk using <br/>
 `npm install` <br/>
 * Run this command to create a droplet <br/>`node digitalocean.js` <br/>
