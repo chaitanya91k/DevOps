@@ -1,1 +1,0 @@
-aws ansible_ssh_host=54.173.184.227 ansible_connection=ssh ansible_ssh_user=ubuntu ansible_ssh_private_key_file=/home/karishma/.ssh/id_rsa
