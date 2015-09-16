@@ -15,3 +15,5 @@
   Sample File: `{"accessKeyId": "<your_access_key>", "secretAccessKey": "<your_secret_key>", "region": "us-east-1"}`
 * Run this command to create an AWS EC2 Instance <br/> `node aws.js` <br/>
 * Your inventory file will now be created with two host entries: one for Digital Ocean and the other for AWS
+* Run this command to deploy nginx webserver through ansible playbook <br/>
+  `ansible-playbook --sudo -i inventory ansible_playbook.yml`
