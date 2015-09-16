@@ -13,6 +13,10 @@ var params = {
 ec2.runInstances(params, function(err, data) {
   if (err) { console.log("Could not create instance", err); return; }
 
+  var instance = data.Instances[0];
+  console.log("Instance: ", instance);
   var instanceId = data.Instances[0].InstanceId;
-  console.log("Created instance", instanceId);
+  console.log("Instance Id: ", instanceId);
+  var instanceIp = data.Instances[0].PrivateIpAddress;
+  console.log("Instance Ip: ", instanceIp);
 });

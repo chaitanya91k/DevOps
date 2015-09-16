@@ -103,7 +103,7 @@ client.listRegions(function(error, response)
 					}
 				}
 			}
-			image="ubuntu-15-04-x64";
+			image="ubuntu-14-04-x64";
 			console.log("Image selected: ", image);
 		}
 
@@ -159,9 +159,10 @@ client.listRegions(function(error, response)
  								console.log("Image is Coreos");
  								ssh_user="core";
  							}
- 							digitalOceanInventory="digitalOceanNode ansible_ssh_host=" + dropletIpAddress + 
- 												  " ansible_ssh_user=" + ssh_user + " ansible_ssh_private_key_file=" + ssh_path;
-							fs.writeFile("inventory", digitalOceanInventory, function(err) 
+ 							digitalOceanInventory='digitalOceanNode ansible_ssh_host=' + dropletIpAddress + 
+ 												  ' ansible_connection=ssh ansible_ssh_user=' + ssh_user + 
+ 												  ' ansible_ssh_private_key_file=' + ssh_path;
+							fs.writeFile('inventory', digitalOceanInventory, function(err) 
 							{
     							if(err) 
     							{
