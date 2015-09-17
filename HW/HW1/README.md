@@ -10,7 +10,7 @@
 * Create a file called aws_config.json that includes the accessKey, secretKey and region.<br/>
   Sample File: `{"accessKeyId": "<your_access_key>", "secretAccessKey": "<your_secret_key>", "region": "us-east-1"}`
 * Create or upload a public key and provide a name for it. Note this name and update the aws.js file to include your KeyName on line 9
-* Update the variable ssh_path in digitalocean.js and aws.js to point to your private key
+* Update the variable ssh_path in digitalocean.js and aws.js to point to the path of your private key
 
 ### Steps ###
 #### Method 1: Script ####
