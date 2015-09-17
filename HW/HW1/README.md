@@ -14,7 +14,7 @@
 
 ### Steps ###
 #### Method 1: Script ####
-* Run the script servers.sh using any of the following commands <br/> `sh servers.sh`<br/> `./servers.sh` <br/> It will install dependencies, create droplet, create instance and deploy nginx webserver through ansible playbook
+* Run the script servers.sh using any of the following commands <br/> `sh servers.sh`<br/> `./servers.sh` <br/> It will install dependencies, create droplet, create instance, create inventory file and deploy nginx webserver through ansible playbook
 
 #### Method 2: Manually ####
 * Install dependencies specified in package.json for needle and aws-sdk using <br/>
