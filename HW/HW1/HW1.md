@@ -24,3 +24,6 @@
 * Your inventory file will now be created with two host entries: one for Digital Ocean and the other for AWS
 * Run this command to deploy nginx webserver through ansible playbook <br/>
   `ansible-playbook --sudo -i inventory ansible_playbook.yml`
+
+### Screencast ###
+[ Demo ] (https://youtu.be/gUiocGlpnFA)
