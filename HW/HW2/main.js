@@ -60,7 +60,10 @@ var mockFileLibrary =
 {
 	pathExists:
 	{
-		'path/fileExists': {}
+		'path/fileExists': {},
+		'path/fileDoesNotExist': {},
+		'path/dirExists': {},
+		'path/dirDoesNotExist': {}
 	},
 	fileWithContent:
 	{
@@ -69,6 +72,16 @@ var mockFileLibrary =
   			file1: 'text content',
 		}
 	}
+};
+
+function cartesianProductOf(list) {
+    return _.reduce(list, function(a, b) {
+        return _.flatten(_.map(a, function(x) {
+            return _.map(b, function(y) {
+                return x.concat([y]);
+            });
+        }), true);
+    }, [ [] ]);
 };
 
 function generateTestCases()
@@ -98,32 +111,51 @@ function generateTestCases()
 		var pathExists      = _.some(constraints, {kind: 'fileExists' });
 
 		var params = {};
+		// initialize params
+		for (var i =0; i < functionConstraints[funcName].params.length; i++ )
+		{
+			var paramName = functionConstraints[funcName].params[i];
+			//params[paramName] = '\'' + faker.phone.phoneNumber()+'\'';
+			//params[paramName] = '\'\'';
+			params[paramName] = ['\'\'']
+			//console.log("Params---->" + paramName+"\t"+params[paramName])
+		}
+
 		// plug-in values for parameters
 		for( var c = 0; c < constraints.length; c++ )
 		{
 
+			//var params = {};
 
-			// initialize params
-			for (var i =0; i < functionConstraints[funcName].params.length; i++ )
-			{
-				var paramName = functionConstraints[funcName].params[i];
-				//params[paramName] = '\'' + faker.phone.phoneNumber()+'\'';
-				params[paramName] = '\'\'';
-				//console.log("Params---->" + paramName+"\t"+params[paramName])
-			}
-
+			
 			var constraint = constraints[c];
 			console.log("------------------------------------")
 			console.log(constraint.ident+"="+constraint.value)
 			if( params.hasOwnProperty( constraint.ident ) )
 			{
-				params[constraint.ident] = constraint.value;
+				console.log("Constraint value = "+ constraint.value)
+				params[constraint.ident].push(constraint.value);
 			}
-		
+			
+		}
+
+		console.log(params)
 
 		// Prepare function arguments.
-		var args = Object.keys(params).map( function(k) {return params[k]; }).join(",");
+		var args = Object.keys(params).map( function(k) {return "["+params[k]+"]"; }).join(",");
+		var list = Object.keys(params).map( function(x) { return params[x] } );
 		
+		console.log("###########")
+		console.log(list)
+		cartesianProduct = cartesianProductOf(list)
+		console.log("cartesian product")
+		console.log(cartesianProduct)
+
+		for (var i=0; i< cartesianProduct.length; i++) {
+			content += "subject.{0}({1});\n".format(funcName, cartesianProduct[i] );
+		}
+		
+		//}
 		if( pathExists || fileWithContent )
 		{
 			content += generateMockFsTestCases(pathExists,fileWithContent,funcName, args);
@@ -135,10 +167,10 @@ function generateTestCases()
 		else
 		{
 			// Emit simple test case.
-			content += "subject.{0}({1});\n".format(funcName, args );
+			// content += "subject.{0}({1});\n".format(funcName, args );
 		}
 	
-}
+
 	}
 
 
@@ -193,7 +225,7 @@ function constraints(filePath)
 				if( child.type === 'BinaryExpression' && child.operator == "==")
 				{
 					//added to test q == "undefined"
-					if( child.left.type == 'Identifier' && params.indexOf( child.left.name ) > -1 && child.right.type == 'Identifier')
+					if( child.left.type == 'Identifier' && params.indexOf( child.left.name ) > -1)
 					{
 						// get expression from original source code:
 						var expression = buf.substring(child.range[0], child.range[1]);
@@ -210,15 +242,39 @@ function constraints(filePath)
 							operator : child.operator,
 							expression: expression	
 						}));
+
+						functionConstraints[funcName].constraints.push( 
+						new Constraint(
+						{
+							ident: child.left.name,
+							value: "'strict'",
+							funcName: funcName,
+							kind: "string",
+							operator : child.operator,
+							expression: expression	
+						}));
+
+						functionConstraints[funcName].constraints.push( 
+						new Constraint(
+						{
+							ident: child.left.name,
+							value: "'werwabc'",
+							funcName: funcName,
+							kind: "string",
+							operator : child.operator,
+							expression: expression	
+						}));
+						
 						
 					}
 
 				}
 
-				if( child.type === 'BinaryExpression' && child.operator == "==")
+
+				if( child.type === 'BinaryExpression' && child.operator == "!=")
 				{
-					//added to test q == "undefined"
-					if( child.left.type == 'Identifier' && params.indexOf( child.left.name ) > -1 && child.right.type == 'Identifier' && child.left.name =='mode')
+					//added to test q != "some-value"
+					if( child.left.type == 'Identifier' && params.indexOf( child.left.name ) > -1 )
 					{
 						// get expression from original source code:
 						var expression = buf.substring(child.range[0], child.range[1]);
@@ -229,12 +285,24 @@ function constraints(filePath)
 						new Constraint(
 						{
 							ident: child.left.name,
+							value: "'"+rightHand+"asad'",
+							funcName: funcName,
+							kind: "string",
+							operator : child.operator,
+							expression: expression	
+						}));
+
+						functionConstraints[funcName].constraints.push( 
+						new Constraint(
+						{
+							ident: child.left.name,
 							value: rightHand,
 							funcName: funcName,
 							kind: "string",
 							operator : child.operator,
 							expression: expression	
 						}));
+						
 						
 					}
 
@@ -260,50 +328,52 @@ function constraints(filePath)
 							expression: expression
 						}));
 						
+						functionConstraints[funcName].constraints.push( 
+						new Constraint(
+						{
+							ident: child.left.name,
+							value: rightHand,
+							funcName: funcName,
+							kind: "integer",
+							operator : child.operator,
+							expression: expression
+						}));
 					}
 
 				}
 
-
-				// added to test x > 7 && y < 0
-				if( child.type === 'LogicalExpression' && child.operator == "&&")
+				// added to test p > 0
+				if( child.type === 'BinaryExpression' && child.operator == ">")
 				{
-					if( child.left.type == 'BinaryExpression' && child.left.operator == '>' 
-						&& child.right.type == 'BinaryExpression' && child.right.operator == '<')
+					if( child.left.type == 'Identifier' && params.indexOf( child.left.name ) > -1 && child.right.type == 'Literal')
 					{
 						// get expression from original source code:
 						var expression = buf.substring(child.range[0], child.range[1]);
 						var rightHand = buf.substring(child.right.range[0], child.right.range[1])
-						
-						if(child.left.left.type == 'Identifier' && params.indexOf( child.left.left.name ) > -1 && child.left.right.type == 'Literal' 
-							&& child.right.left.type == 'Identifier' && params.indexOf( child.right.left.name ) > -1 && child.right.right.type == 'Literal')
+
+						functionConstraints[funcName].constraints.push( 
+						new Constraint(
 						{
-
-							functionConstraints[funcName].constraints.push( 
-							new Constraint(
-							{
-								ident: child.right.left.name,
-								value: child.right.right.value - 1,
-								//value: -6,
-								funcName: funcName,
-								kind: "integer",
-								operator : child.operator,
-								expression: expression
-							}));
-
-							functionConstraints[funcName].constraints.push( 
-							new Constraint(
-							{
-								ident: child.left.left.name,
-								value: child.left.right.value + 1,
-								//value: -6,
-								funcName: funcName,
-								kind: "integer",
-								operator : child.operator,
-								expression: expression
-							}));
-						}	
+							ident: child.left.name,
+							value: rightHand+1,
+							funcName: funcName,
+							kind: "integer",
+							operator : child.operator,
+							expression: expression
+						}));
+						
+						functionConstraints[funcName].constraints.push( 
+						new Constraint(
+						{
+							ident: child.left.name,
+							value: rightHand,
+							funcName: funcName,
+							kind: "integer",
+							operator : child.operator,
+							expression: expression
+						}));
 					}
+
 				}
 
 				if( child.type == "CallExpression" && 
@@ -328,6 +398,7 @@ function constraints(filePath)
 					}
 				}
 
+
 				if( child.type == "CallExpression" &&
 					 child.callee.property &&
 					 child.callee.property.name =="existsSync")
@@ -344,6 +415,18 @@ function constraints(filePath)
 								value:  "'path/fileExists'",
 								funcName: funcName,
 								kind: "fileExists",
+								operator : child.operator,
+								expression: expression
+							}));
+
+							functionConstraints[funcName].constraints.push( 
+							new Constraint(
+							{
+								ident: params[p],
+								// A fake path to a file
+								value:  "'path/fileDoesNotExist'",
+								funcName: funcName,
+								kind: "fileDoesNotExist",
 								operator : child.operator,
 								expression: expression
 							}));
