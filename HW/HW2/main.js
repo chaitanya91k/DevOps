@@ -60,21 +60,19 @@ var mockFileLibrary =
 {
 	pathExists:
 	{
-		'path/fileExists': {},
-		'path/fileDoesNotExist': {},
-		'path/dirExists': {},
-		'path/dirDoesNotExist': {}
+		'path/fileExists': {}
 	},
 	fileWithContent:
 	{
 		pathContent: 
 		{	
   			file1: 'text content',
+  			file2: '',
 		}
 	}
 };
 
-function cartesianProductOf(list) {
+function permutations(list) {
     return _.reduce(list, function(a, b) {
         return _.flatten(_.map(a, function(x) {
             return _.map(b, function(y) {
@@ -90,20 +88,7 @@ function generateTestCases()
 	var content = "var subject = require('./subject.js')\nvar mock = require('mock-fs');\n";
 	for ( var funcName in functionConstraints )
 	{
-		/*
-		var params = {};
-
-		// initialize params
-		for (var i =0; i < functionConstraints[funcName].params.length; i++ )
-		{
-			var paramName = functionConstraints[funcName].params[i];
-			//params[paramName] = '\'' + faker.phone.phoneNumber()+'\'';
-			params[paramName] = '\'\'';
-			//console.log("Params---->" + paramName+"\t"+params[paramName])
-		}
-*/
-		//console.log("Function with params: "+funcName+"\t"+params );
-
+		
 		// update parameter values based on known constraints.
 		var constraints = functionConstraints[funcName].constraints;
 		// Handle global constraints...
@@ -111,6 +96,7 @@ function generateTestCases()
 		var pathExists      = _.some(constraints, {kind: 'fileExists' });
 
 		var params = {};
+		var paramsFiles = {};
 		// initialize params
 		for (var i =0; i < functionConstraints[funcName].params.length; i++ )
 		{
@@ -118,6 +104,7 @@ function generateTestCases()
 			//params[paramName] = '\'' + faker.phone.phoneNumber()+'\'';
 			//params[paramName] = '\'\'';
 			params[paramName] = ['\'\'']
+			paramsFiles[paramName] = '\'\'';
 			//console.log("Params---->" + paramName+"\t"+params[paramName])
 		}
 
@@ -129,30 +116,32 @@ function generateTestCases()
 
 			
 			var constraint = constraints[c];
-			console.log("------------------------------------")
-			console.log(constraint.ident+"="+constraint.value)
+			// console.log("------------------------------------")
+			// console.log(constraint.ident+"="+constraint.value)
 			if( params.hasOwnProperty( constraint.ident ) )
 			{
 				console.log("Constraint value = "+ constraint.value)
 				params[constraint.ident].push(constraint.value);
+				paramsFiles[constraint.ident] = constraint.value;
 			}
 			
 		}
 
-		console.log(params)
+		// console.log(params)
+		// console.log(paramsFiles)
 
 		// Prepare function arguments.
-		var args = Object.keys(params).map( function(k) {return "["+params[k]+"]"; }).join(",");
+		// var args = Object.keys(params).map( function(k) {return "["+params[k]+"]"; }).join(",");
+		var args = Object.keys(params).map( function(k) {return paramsFiles[k]; }).join(",");
 		var list = Object.keys(params).map( function(x) { return params[x] } );
 		
-		console.log("###########")
-		console.log(list)
-		cartesianProduct = cartesianProductOf(list)
-		console.log("cartesian product")
-		console.log(cartesianProduct)
+		// console.log("###########")
+		// console.log(list)
+		permutation = permutations(list)
+		
 
-		for (var i=0; i< cartesianProduct.length; i++) {
-			content += "subject.{0}({1});\n".format(funcName, cartesianProduct[i] );
+		for (var i=0; i< permutation.length; i++) {
+			content += "subject.{0}({1});\n".format(funcName, permutation[i] );
 		}
 		
 		//}
@@ -167,7 +156,7 @@ function generateTestCases()
 		else
 		{
 			// Emit simple test case.
-			// content += "subject.{0}({1});\n".format(funcName, args );
+		 	content += "subject.{0}({1});\n".format(funcName, args );
 		}
 	
 
@@ -247,28 +236,48 @@ function constraints(filePath)
 						new Constraint(
 						{
 							ident: child.left.name,
-							value: "'strict'",
+							value: "'"+rightHand+"asad'",
 							funcName: funcName,
 							kind: "string",
 							operator : child.operator,
 							expression: expression	
 						}));
-
-						functionConstraints[funcName].constraints.push( 
-						new Constraint(
-						{
-							ident: child.left.name,
-							value: "'werwabc'",
-							funcName: funcName,
-							kind: "string",
-							operator : child.operator,
-							expression: expression	
-						}));
-						
 						
 					}
-
 				}
+
+
+
+				if ( child.type == 'BinaryExpression' && child.operator == "==" && 
+					child.left.type == 'CallExpression' && child.left.callee.property.type == 'Identifier' 
+					&& child.left.callee.property.name == 'indexOf') 
+				{
+					var substring = child.left.arguments[0].value
+
+					functionConstraints[funcName].constraints.push( 
+					new Constraint(
+					{
+						ident: child.left.callee.object.name,
+						value: "'"+substring+"abcd'",
+						funcName: funcName,
+						kind: "string",
+						operator : child.operator,
+						expression: expression	
+					}));
+
+					functionConstraints[funcName].constraints.push( 
+					new Constraint(
+					{
+						ident: child.left.callee.object.name,
+						value: "'abcd"+ substring+"'",
+						funcName: funcName,
+						kind: "string",
+						operator : child.operator,
+						expression: expression	
+					}));
+				}
+
+				
 
 
 				if( child.type === 'BinaryExpression' && child.operator == "!=")
@@ -376,6 +385,28 @@ function constraints(filePath)
 
 				}
 
+				if( child.type == "CallExpression" && child.callee.property && child.callee.property.name == "readdirSync") 
+				{
+					for( var p =0; p < params.length; p++ )
+					{
+						if( child.arguments[0].name == params[p] )
+						{
+							functionConstraints[funcName].constraints.push( 
+							new Constraint(
+							{
+								ident: params[p],
+								// A fake path to a file
+								value:  "'path/fileExists'",
+								funcName: funcName,
+								kind: "fileExists",
+								operator : child.operator,
+								expression: expression
+							}));
+
+						}
+					}
+				}
+
 				if( child.type == "CallExpression" && 
 					 child.callee.property &&
 					 child.callee.property.name =="readFileSync" )
@@ -394,6 +425,17 @@ function constraints(filePath)
 								operator : child.operator,
 								expression: expression
 							}));
+
+							// functionConstraints[funcName].constraints.push( 
+							// new Constraint(
+							// {
+							// 	ident: params[p],
+							// 	value:  "'pathContent/file2'",
+							// 	funcName: funcName,
+							// 	kind: "fileWithContent",
+							// 	operator : child.operator,
+							// 	expression: expression
+							// }));
 						}
 					}
 				}
@@ -424,12 +466,13 @@ function constraints(filePath)
 							{
 								ident: params[p],
 								// A fake path to a file
-								value:  "'path/fileDoesNotExist'",
+								value:  "'pathContent'",
 								funcName: funcName,
-								kind: "fileDoesNotExist",
+								kind: "fileWithContent",
 								operator : child.operator,
 								expression: expression
 							}));
+
 						}
 					}
 				}
