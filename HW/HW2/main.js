@@ -320,12 +320,22 @@ function constraints(filePath)
 					&& child.left.callee.property.name == 'indexOf') 
 				{
 					var substring = child.left.arguments[0].value
+					var position = child.right.value
+					// console.log("Position of substring : "+ position)
+
+					var testValue = ''
+					for (var i=0; i < position; i++) 
+					{
+						testValue+='z'
+					}
+					testValue+=substring
+					// console.log("TestValue: "+testValue)
 
 					functionConstraints[funcName].constraints.push( 
 					new Constraint(
 					{
 						ident: child.left.callee.object.name,
-						value: "'"+substring+"abcd'",
+						value: "'"+testValue+"abcd'",
 						funcName: funcName,
 						kind: "string",
 						operator : child.operator,
@@ -336,7 +346,7 @@ function constraints(filePath)
 					new Constraint(
 					{
 						ident: child.left.callee.object.name,
-						value: "'abcd"+ substring+"'",
+						value: "'abcd"+ testValue+"'",
 						funcName: funcName,
 						kind: "string",
 						operator : child.operator,
