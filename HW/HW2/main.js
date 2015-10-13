@@ -67,11 +67,11 @@ var mockFileLibrary =
 		pathContent: 
 		{	
   			file1: 'text content',
-  			file2: '',
 		}
 	}
 };
 
+//this generates cartesianProduct: Used this function from Stack Overflow i.e. generate cartesianProduct for a list of values in node js
 function permutations(list) {
     return _.reduce(list, function(a, b) {
         return _.flatten(_.map(a, function(x) {
@@ -95,6 +95,9 @@ function generateTestCases()
 		var fileWithContent = _.some(constraints, {kind: 'fileWithContent' });
 		var pathExists      = _.some(constraints, {kind: 'fileExists' });
 
+		var phoneNumber = false
+		var options = false
+		var numberList = [[0,1,2,3,4,5,6,7,8,9], [0,1,2,3,4,5,6,7,8,9], [0,1,2,3,4,5,6,7,8,9]]
 		var params = {};
 		var paramsFiles = {};
 		// initialize params
@@ -105,6 +108,14 @@ function generateTestCases()
 			//params[paramName] = '\'\'';
 			params[paramName] = ['\'\'']
 			paramsFiles[paramName] = '\'\'';
+			if (paramName == "phoneNumber")
+			{
+				phoneNumber = true
+			}
+			if( paramName == "options") 
+			{
+				options = true
+			}
 			//console.log("Params---->" + paramName+"\t"+params[paramName])
 		}
 
@@ -142,9 +153,9 @@ function generateTestCases()
 
 		for (var i=0; i< permutation.length; i++) {
 			content += "subject.{0}({1});\n".format(funcName, permutation[i] );
-		}
 		
-		//}
+		}
+
 		if( pathExists || fileWithContent )
 		{
 			content += generateMockFsTestCases(pathExists,fileWithContent,funcName, args);
@@ -156,9 +167,28 @@ function generateTestCases()
 		else
 		{
 			// Emit simple test case.
-		 	content += "subject.{0}({1});\n".format(funcName, args );
+		 	// content += "subject.{0}({1});\n".format(funcName, permutation[i] );
 		}
 	
+		//if phoneNumber is present in the params, generate permutations of 3 digit numbers from 3 lists. Remaining 7 digits could be random values
+		if(phoneNumber)
+		{ 
+			numberListPermutations = permutations(numberList)
+			for (var i=0; i< numberListPermutations.length; i++) {
+				var phoneNumberGen = "'" + numberListPermutations[i].toString().split(',').join('') + "9999999'";
+				// console.log(parsedString)
+				params["phoneNumber"] = phoneNumberGen
+				if(options)
+				{
+					params["options"] = "'random'"
+				}
+				console.log(params)
+
+				var args = Object.keys(params).map( function(k) {return params[k]; }).join(",");
+				content += "subject.{0}({1});\n".format(funcName, args );
+			}
+
+		}
 
 	}
 
