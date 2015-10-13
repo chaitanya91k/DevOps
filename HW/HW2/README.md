@@ -1,4 +1,4 @@
-## HW2: Test Generation 
+## HW #2 Test Generation and Coverage 
 
 ### Screenshots for Code Coverage
 
