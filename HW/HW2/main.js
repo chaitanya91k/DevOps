@@ -67,6 +67,10 @@ var mockFileLibrary =
 		pathContent: 
 		{	
   			file1: 'text content',
+		},
+		pathContent1:
+		{
+			file2: '',
 		}
 	}
 };
@@ -132,8 +136,25 @@ function generateTestCases()
 			if( params.hasOwnProperty( constraint.ident ) )
 			{
 				console.log("Constraint value = "+ constraint.value)
-				params[constraint.ident].push(constraint.value);
-				paramsFiles[constraint.ident] = constraint.value;
+				if(constraint.ident == "dir")
+				{
+						if( constraint.kind == "fileExists")
+						{
+							params[constraint.ident].push(constraint.value);
+						}
+				}
+				else if(constraint.ident == "filePath")	
+				{
+					if( constraint.kind == "fileWithContent")
+					{
+						params[constraint.ident].push(constraint.value);
+					}
+				}
+				else
+				{
+					params[constraint.ident].push(constraint.value);
+					paramsFiles[constraint.ident] = constraint.value;
+				}
 			}
 			
 		}
@@ -144,30 +165,46 @@ function generateTestCases()
 		// Prepare function arguments.
 		// var args = Object.keys(params).map( function(k) {return "["+params[k]+"]"; }).join(",");
 		var args = Object.keys(params).map( function(k) {return paramsFiles[k]; }).join(",");
+		console.log("ARGS : --------------")
+		console.log(args)
 		var list = Object.keys(params).map( function(x) { return params[x] } );
 		
 		// console.log("###########")
 		// console.log(list)
 		permutation = permutations(list)
-		
+		console.log("LIST : ---------------")
+		console.log(list)
 
 		for (var i=0; i< permutation.length; i++) {
 			content += "subject.{0}({1});\n".format(funcName, permutation[i] );
 		
-		}
+		// }
 
-		if( pathExists || fileWithContent )
-		{
-			content += generateMockFsTestCases(pathExists,fileWithContent,funcName, args);
-			// Bonus...generate constraint variations test cases....
-			content += generateMockFsTestCases(!pathExists,fileWithContent,funcName, args);
-			content += generateMockFsTestCases(pathExists,!fileWithContent,funcName, args);
-			content += generateMockFsTestCases(!pathExists,!fileWithContent,funcName, args);
-		}
-		else
-		{
-			// Emit simple test case.
-		 	// content += "subject.{0}({1});\n".format(funcName, permutation[i] );
+			if( pathExists || fileWithContent )
+			{
+				console.log("I th value in list : -------------------")
+				console.log(permutation[i]);
+				console.log(permutation[i].length)
+				var argument = permutation[i].join(',')
+				if (argument == "'',''")
+				{
+					console.log("Found all blanks")
+				}
+				else
+				{
+					console.log(argument)
+					content += generateMockFsTestCases(pathExists,fileWithContent,funcName, argument);
+					// Bonus...generate constraint variations test cases....
+					content += generateMockFsTestCases(!pathExists,fileWithContent,funcName, argument);
+					content += generateMockFsTestCases(pathExists,!fileWithContent,funcName, argument);
+					content += generateMockFsTestCases(!pathExists,!fileWithContent,funcName, argument);
+				}
+			}
+			else
+			{
+				// Emit simple test case.
+			 	// content += "subject.{0}({1});\n".format(funcName, permutation[i] );
+			}
 		}
 	
 		//if phoneNumber is present in the params, generate permutations of 3 digit numbers from 3 lists. Remaining 7 digits could be random values
@@ -182,7 +219,7 @@ function generateTestCases()
 				{
 					params["options"] = "'random'"
 				}
-				console.log(params)
+				// console.log(params)
 
 				var args = Object.keys(params).map( function(k) {return params[k]; }).join(",");
 				content += "subject.{0}({1});\n".format(funcName, args );
@@ -415,27 +452,27 @@ function constraints(filePath)
 
 				}
 
-				if( child.type == "CallExpression" && child.callee.property && child.callee.property.name == "readdirSync") 
-				{
-					for( var p =0; p < params.length; p++ )
-					{
-						if( child.arguments[0].name == params[p] )
-						{
-							functionConstraints[funcName].constraints.push( 
-							new Constraint(
-							{
-								ident: params[p],
-								// A fake path to a file
-								value:  "'path/fileExists'",
-								funcName: funcName,
-								kind: "fileExists",
-								operator : child.operator,
-								expression: expression
-							}));
+				// if( child.type == "CallExpression" && child.callee.property && child.callee.property.name == "readdirSync") 
+				// {
+				// 	for( var p =0; p < params.length; p++ )
+				// 	{
+				// 		if( child.arguments[0].name == params[p] )
+				// 		{
+				// 			functionConstraints[funcName].constraints.push( 
+				// 			new Constraint(
+				// 			{
+				// 				ident: params[p],
+				// 				// A fake path to a file
+				// 				value:  "'path/fileExists'",
+				// 				funcName: funcName,
+				// 				kind: "fileExists",
+				// 				operator : child.operator,
+				// 				expression: expression
+				// 			}));
 
-						}
-					}
-				}
+				// 		}
+				// 	}
+				// }
 
 				if( child.type == "CallExpression" && 
 					 child.callee.property &&
@@ -445,6 +482,9 @@ function constraints(filePath)
 					{
 						if( child.arguments[0].name == params[p] )
 						{
+							console.log("Inside readFileSync")
+							console.log(params[p] + "\t" + "'pathContent/file1'" )
+
 							functionConstraints[funcName].constraints.push( 
 							new Constraint(
 							{
@@ -456,16 +496,16 @@ function constraints(filePath)
 								expression: expression
 							}));
 
-							// functionConstraints[funcName].constraints.push( 
-							// new Constraint(
-							// {
-							// 	ident: params[p],
-							// 	value:  "'pathContent/file2'",
-							// 	funcName: funcName,
-							// 	kind: "fileWithContent",
-							// 	operator : child.operator,
-							// 	expression: expression
-							// }));
+							functionConstraints[funcName].constraints.push( 
+							new Constraint(
+							{
+								ident: params[p],
+								value:  "'pathContent1/file2'",
+								funcName: funcName,
+								kind: "fileWithContent",
+								operator : child.operator,
+								expression: expression
+							}));
 						}
 					}
 				}
@@ -479,6 +519,11 @@ function constraints(filePath)
 					{
 						if( child.arguments[0].name == params[p] )
 						{
+
+
+							console.log("Inside existsSync")
+							console.log(params[p] + "\t" + "'path/fileExists'" )
+
 							functionConstraints[funcName].constraints.push( 
 							new Constraint(
 							{
@@ -496,7 +541,7 @@ function constraints(filePath)
 							{
 								ident: params[p],
 								// A fake path to a file
-								value:  "'pathContent'",
+								value:  "'pathContent/file1'",
 								funcName: funcName,
 								kind: "fileWithContent",
 								operator : child.operator,
