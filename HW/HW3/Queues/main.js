@@ -3,9 +3,9 @@ var multer  = require('multer')
 var express = require('express')
 var fs      = require('fs')
 var app = express()
+var proxyApp = express()
 // REDIS
 var client = redis.createClient(6379, '127.0.0.1', {})
-var length;
 ///////////// WEB ROUTES
 
 // Add hook to make it easier to get all visited URLS.
@@ -15,46 +15,53 @@ app.use(function(req, res, next)
 
 	// ... INSERT HERE.
 	client.lpush('queue', req.url, function(err, reply) {
-		console.log("Length: ", reply);
+		console.log("URL Queue Length after pushing: ", reply);
 		client.ltrim('queue', 0, 4);
-		client.lrange('queue',0,-1, function(error, queue) {
-	        console.log("queue: " + queue);
-	    })
-
 	})
-	
-	// console.log("Queue length: ", client.llen('queue'))
 
 	next(); // Passing the request to the next handler in the stack.
 });
 
-// app.post('/upload',[ multer({ dest: './uploads/'}), function(req, res){
-//    console.log(req.body) // form fields
-//    console.log(req.files) // form files
+proxyApp.use(function(req, res, next)
+{
+	client.rpoplpush('proxyUrlQueue', 'proxyUrlQueue', function(err, reply) {
+		console.log("Value from queue ", reply);
+		console.log(req.url)
+		res.redirect(reply+req.url)
+	})
 
-//    if( req.files.image )
-//    {
-// 	   fs.readFile( req.files.image.path, function (err, data) {
-// 	  		if (err) throw err;
-// 	  		var img = new Buffer(data).toString('base64');
-// 	  		console.log(img);
-// 		});
-// 	}
+})
 
-//    res.status(204).end()
-// }]);
+app.post('/upload',[ multer({ dest: './uploads/'}), function(req, res){
+   console.log(req.body) // form fields
+   console.log(req.files) // form files
 
-// app.get('/meow', function(req, res) {
-// 	{
-// 		if (err) throw err
-// 		res.writeHead(200, {'content-type':'text/html'});
-// 		items.forEach(function (imagedata) 
-// 		{
-//    		res.write("<h1>\n<img src='data:my_pic.jpg;base64,"+imagedata+"'/>");
-// 		});
-//    	res.end();
-// 	}
-// })
+   if( req.files.image )
+   {
+	   fs.readFile( req.files.image.path, function (err, data) {
+	  		if (err) throw err;
+	  		var img = new Buffer(data).toString('base64');
+	  		client.lpush('image', img, function(err, reply) {
+	  			console.log("Image Queue length: ", reply);
+	  		})
+		});
+	}
+
+   res.status(204).end()
+}]);
+
+app.get('/meow', function(req, res) {
+
+	client.lrange('image', 0, 0, function(err, imagedata) {
+		res.write("<h1>\n<img src='data:my_pic.jpg;base64,"+imagedata+"'/>");
+		client.lpop('image', function(err, value) {
+			// console.log("After popping: ", value)
+			console.log("top value removed")
+		})
+		res.end();
+	});
+   	
+})
 
 // HTTP SERVER
 var server = app.listen(3000, function () {
@@ -62,7 +69,38 @@ var server = app.listen(3000, function () {
   var host = server.address().address
   var port = server.address().port
 
+  client.del('proxyUrlQueue', function(err, reply) {
+  	console.log("Deleted old queue: ", reply)
+  })
+
+  	var url1 = 'http://localhost:'+port
+
+	client.lpush('proxyUrlQueue', url1, function(err, reply) {
+	  	console.log("Added url1 in queue");
+	})
+
   console.log('Example app listening at http://%s:%s', host, port)
+})
+
+// HTTP SERVER
+var server1 = app.listen(3001, function () {
+
+  var host1 = server1.address().address
+  var port1 = server1.address().port
+
+	var url2 = 'http://localhost:'+port1
+
+	client.lpush('proxyUrlQueue', url2, function(err, reply) {
+	  	console.log("Added url2 in queue");
+	})
+  console.log('Example app listening at http://%s:%s', host1, port1)
+})
+
+var server2 = proxyApp.listen(80, function () {
+	var host2 = server2.address().address
+	var port2 = server2.address().port
+
+	console.log('Example proxyApp listening at http://%s:%s', host2, port2)
 })
 
 app.get('/', function(req, res) {
