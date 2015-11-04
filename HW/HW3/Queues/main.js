@@ -53,7 +53,14 @@ app.post('/upload',[ multer({ dest: './uploads/'}), function(req, res){
 app.get('/meow', function(req, res) {
 
 	client.lrange('image', 0, 0, function(err, imagedata) {
-		res.write("<h1>\n<img src='data:my_pic.jpg;base64,"+imagedata+"'/>");
+		if (imagedata == "") {
+			console.log("Empty queue")
+			res.send("No images to show !")
+		}
+		else {
+			res.write("<h1>\n<img src='data:my_pic.jpg;base64,"+imagedata+"'/>");
+		}
+		
 		client.lpop('image', function(err, value) {
 			// console.log("After popping: ", value)
 			console.log("top value removed")
