@@ -4,12 +4,12 @@
 * Clone this repo
 * Go to the Queues directory `cd Queues`
 * Run `npm install` to install the dependencies
-* Run `sudo node main.js`
+* Run `sudo node main.js` to start the server
 
 ### Tasks
 Express server has been configured to listen on port 3000. The same can be viewed at `http://localhost:3000/`.
 
-* get/set - On visiting `http://localhost:3000/set`, a key would be set with the message that expired in 10 seconds. Hence, visit `http://localhost:3000/get` to view the key within 10 seconds.
+* get/set - On visiting `http://localhost:3000/set`, a key would be set with the message that expires in 10 seconds. Hence, visit `http://localhost:3000/get` to view the key within 10 seconds.
 
 * recent - `http://localhost:3000/recent` would display 5 recent urls that were visited. Redis queues have been used for the same.
 
@@ -17,6 +17,6 @@ Express server has been configured to listen on port 3000. The same can be viewe
 
 * Additional service instance running - An additional instance is configured to listen on port 3001. All the above urls can be visited through the port 3001. 
 
-* Proxy - A new express server instance acting as proxy has been configured to listen on port 80. It alternately picks up localhost:3000 and localhost:3001 from redis queue by using the rpoplpush function. Hence, localhost would act as proxy server for two instances running on ports 3000 and 3001, thus enabling all the above requests to the proxy server.
+* Proxy - A new express server instance acting as proxy has been configured to listen on port 80. It alternately picks up localhost:3000 and localhost:3001 from redis queue by using the `rpoplpush` function. Hence, localhost would act as proxy server for two instances running on ports 3000 and 3001, thus enabling all the above requests to the proxy server.
 
 ### Screencast
