@@ -15,7 +15,7 @@ app.use(function(req, res, next)
 
 	// ... INSERT HERE.
 	client.lpush('queue', req.url, function(err, reply) {
-		console.log("URL Queue Length after pushing: ", reply);
+		// console.log("URL Queue Length after pushing: ", reply);
 		client.ltrim('queue', 0, 4);
 	})
 
@@ -25,8 +25,8 @@ app.use(function(req, res, next)
 proxyApp.use(function(req, res, next)
 {
 	client.rpoplpush('proxyUrlQueue', 'proxyUrlQueue', function(err, reply) {
-		console.log("Value from queue ", reply);
-		console.log(req.url)
+		// console.log("Value from queue ", reply);
+		// console.log(req.url)
 		res.redirect(reply+req.url)
 	})
 
@@ -54,7 +54,7 @@ app.get('/meow', function(req, res) {
 
 	client.lrange('image', 0, 0, function(err, imagedata) {
 		if (imagedata == "") {
-			console.log("Empty queue")
+			// console.log("Empty queue")
 			res.send("No images to show !")
 		}
 		else {
@@ -77,7 +77,7 @@ var server = app.listen(3000, function () {
   var port = server.address().port
 
   client.del('proxyUrlQueue', function(err, reply) {
-  	console.log("Deleted old queue: ", reply)
+  	console.log("Deleted old url queue")
   })
 
   	var url1 = 'http://localhost:'+port
