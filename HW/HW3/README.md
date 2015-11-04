@@ -11,7 +11,7 @@ Express server has been configured to listen on port 3000. The same can be viewe
 
 * get/set - On visiting `http://localhost:3000/set`, a key would be set with the message that expires in 10 seconds. Hence, visit `http://localhost:3000/get` to view the key within 10 seconds.
 
-* recent - `http://localhost:3000/recent` would display 5 recent urls that were visited. Redis queues have been used for the same.
+* recent - `http://localhost:3000/recent` would display 5 recent urls that were visited. Redis queues have been used for the same with the ltrim function to store 5 recent urls.
 
 * upload/meow - Images can be uploaded by running the curl command from the Queues directory eg. `curl -F "image=@./img/morning.jpg" localhost:3000/upload`. This would upload images in a redis queue. Each request to `http://localhost:3000/meow` will display the images from most recent to least recent of the queue. If the queue is empty, the user will be shown that there are 'No images to show!'.
 
