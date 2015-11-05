@@ -4,6 +4,7 @@
 * Clone this repo
 * Go to the Queues directory `cd Queues`
 * Run `npm install` to install the dependencies
+* Install Redis and start the server using `redis-server` command
 * Run `sudo node main.js` to start the server
 
 ### Tasks
