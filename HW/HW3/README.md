@@ -15,8 +15,12 @@ Express server has been configured to listen on port 3000. The same can be viewe
 
 * upload/meow - Images can be uploaded by running the curl command from the Queues directory eg. `curl -F "image=@./img/morning.jpg" localhost:3000/upload`. This would upload images in a redis queue. Each request to `http://localhost:3000/meow` will display the images from most recent to least recent of the queue. If the queue is empty, the user will be shown that there are 'No images to show!'.
 
-* Additional service instance running - An additional instance is configured to listen on port 3001. All the above urls can be visited through the port 3001. 
+* Additional service instance running - An additional instance is configured to listen on port 3001. All the above urls can be visited through the port 3001. Upload can be perfomed at `http://localhost:3001/upload`
 
-* Proxy - A new express server instance acting as proxy has been configured to listen on port 80. It alternately picks up localhost:3000 and localhost:3001 from redis queue by using the `rpoplpush` function. Hence, localhost would act as proxy server for two instances running on ports 3000 and 3001, thus enabling all the above requests to the proxy server.
+* Proxy - A new http proxy server has been configured to listen on port 80. I have added a dependency for `http-proxy` in package.json. The server alternately picks up localhost:3000 and localhost:3001 from redis queue by using the `rpoplpush` function. Hence, localhost would act as proxy server for two instances running on ports 3000 and 3001, thus enabling all the above requests to the proxy server. Upload can be performed at `http://localhost/upload`
+
+For performing upload to localhost, run the following command from Queues directory <br/>
+`sudo curl -F "image=@./img/morning.jpg" localhost/upload`
 
 ### Screencast
+[ Demo ] (https://youtu.be/SURK34vKFLU)
