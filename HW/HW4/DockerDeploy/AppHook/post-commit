@@ -1,0 +1,17 @@
+#!/bin/bash
+
+echo "***** Inside post-commit hook *****"
+echo "***** Removing any existing image *****"
+docker rmi app
+
+echo "***** Removing existing registry *****"
+docker rmi localhost:5000/myapp:latest
+
+echo "***** Build docker image 'app' *****"
+docker build -t app .
+
+echo "***** Tag image to point to registry *****"
+docker tag -f app localhost:5000/myapp:latest
+
+echo "***** Push to local registry *****"
+docker push localhost:5000/myapp:latest
