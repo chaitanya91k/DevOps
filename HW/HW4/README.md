@@ -51,3 +51,42 @@ docker run -it --link container:dockerContainer --name linkedcontainer linkedcon
 `docker-compose run redisClient`
 <br/>
 ![](https://cloud.githubusercontent.com/assets/9260911/11317283/2cf4543a-8ff7-11e5-8702-ccb9d641e5b0.png)
+
+### 3. Docker Deploy
+
+* Create a Digital Ocean Droplet
+* Code for Docker Deploy is [here](https://github.com/karunim28/DevOps/tree/master/HW/HW4/DockerDeploy)
+* Make the following directory structure
+  * deploy/
+    * blue.git/
+    * blue-www/
+    * green.git/
+    * green-www/
+* Go to blue.git and initialize bare repo `git init --bare`
+* Go to green.git and initialize bare repo `git init --bare`
+* Clone the [App](https://github.com/CSC-DevOps/App)
+* Add remotes for App
+```
+git remote add blue file:///root/deploy/blue.git
+git remote add green file:///root/deploy/green.git
+```
+* The post-commit hook for App is [here](https://github.com/karunim28/DevOps/blob/master/HW/HW4/DockerDeploy/AppHook/post-commit)
+* The post-receive hooks are as follows
+  * [Green Slice](https://github.com/karunim28/DevOps/blob/master/HW/HW4/DockerDeploy/deploy/green.git/hooks/post-receive)
+  * [Blue Slice](https://github.com/karunim28/DevOps/blob/master/HW/HW4/DockerDeploy/deploy/blue.git/hooks/post-receive)
+* Go to App and update main.js (eg. Changing text as 'Hello, this is green slice')
+* Run the commands to deploy the changes to green slice
+```
+git add main.js
+git commit -m "Green Deployment"
+git push green master
+```
+* Go to http://dropletip:8000 to test if app is running
+* Go to App and update main.js (eg. Changing text as 'Hello, this is blue slice')
+* Run the commands to deploy the changes to blue slice
+```
+git add main.js
+git commit -m "Blue Deployment"
+git push blue master
+```
+* Go to http://dropletip:8001 to test if app is running
