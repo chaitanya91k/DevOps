@@ -1,0 +1,16 @@
+#!/bin/sh
+
+echo "***** Push to blue-www *****"
+GIT_WORK_TREE=/root/deploy/blue-www/ git checkout -f
+
+echo "***** Pulling from local registry *****"
+docker pull localhost:5000/myapp:latest
+
+echo "***** Stop docker container *****"
+docker stop blue-myapp
+
+echo "***** Remove docker container *****"
+docker rm blue-myapp
+
+echo "***** Run docker *****"
+docker run -d -p 8001:8080 --name blue-myapp localhost:5000/myapp:latest

@@ -1,0 +1,16 @@
+#!/bin/sh
+
+echo "***** Push to green-www *****"
+GIT_WORK_TREE=/root/deploy/green-www/ git checkout -f
+
+echo "***** Pulling from local registry *****"
+docker pull localhost:5000/myapp:latest
+
+echo "***** Stop docker container *****"
+docker stop green-myapp
+
+echo "***** Remove docker container *****"
+docker rm green-myapp
+
+echo "***** Run docker *****"
+docker run -d -p 8000:8080 --name green-myapp localhost:5000/myapp:latest
