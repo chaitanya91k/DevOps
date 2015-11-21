@@ -90,3 +90,6 @@ git commit -m "Blue Deployment"
 git push blue master
 ```
 * Go to http://dropletip:8001 to test if app is running
+
+### Screencast
+
