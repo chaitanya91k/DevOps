@@ -93,3 +93,7 @@ git push blue master
 
 ### Screencast
 
+### References
+* [Ambassador Pattern](https://docs.docker.com/v1.8/articles/ambassador_pattern_linking/)
+* [Local Registry](https://docs.docker.com/registry/deploying/)
+
