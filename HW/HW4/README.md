@@ -92,6 +92,7 @@ git push blue master
 * Go to http://dropletip:8001 to test if app is running
 
 ### Screencast
+[Demo](https://youtu.be/n8yTge6iUz8)
 
 ### References
 * [Ambassador Pattern](https://docs.docker.com/v1.8/articles/ambassador_pattern_linking/)
